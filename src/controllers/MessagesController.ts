@@ -45,7 +45,16 @@ export default class MessagesController {
       const { page = 1, q } = request.query as unknown as IQueryParams;
 
       const [messages, total] = await this.messagesRepository.findAndCount({
-        select: ['id', 'status', 'from', 'to', 'message', 'schedule_date', 'created_at', 'updated_at'],
+        select: [
+          'id',
+          'status',
+          'from',
+          'to',
+          'message',
+          'schedule_date',
+          'created_at',
+          'updated_at',
+        ],
         take: RES_PER_PAGE,
         skip: (Number(page) - 1) * RES_PER_PAGE,
         where: q ? { status: q } : {},

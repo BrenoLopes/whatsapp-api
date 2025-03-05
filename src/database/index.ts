@@ -1,3 +1,9 @@
-import { createConnection } from 'typeorm';
+import {createConnection, getCustomRepository} from 'typeorm';
 
-createConnection();
+export const initializeDatabase = async () => {
+    const connection = await createConnection()
+    console.log('Connection established!')
+    return connection
+}
+
+

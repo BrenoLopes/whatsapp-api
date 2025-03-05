@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import 'dotenv/config';
 import 'reflect-metadata';
-import '../database';
+import { initializeDatabase } from '../database';
 
 import { getCustomRepository } from 'typeorm';
 import { sleepRandomTime } from '../utils/functions';
@@ -12,37 +12,41 @@ import Whatsapp from './client';
 
 const whatsapp = new Whatsapp();
 
-let checking = false;
+initializeDatabase().then(res => {
+    let checking = false;
 
-const checkMessages = async () => {
-  if (checking) return;
-  checking = true;
+    const checkMessages = async () => {
+        if (checking) return;
+        checking = true;
 
-  console.log('checking new messages');
-  try {
-    const messagesRepository = getCustomRepository(MessagesRepository);
-    const messages = await messagesRepository.findMessagesToSend();
+        console.log('checking new messages');
 
-    console.log(`${messages.length} new message to send`);
+        try {
+            const messagesRepository = getCustomRepository(MessagesRepository);
+            const messages = await messagesRepository.findMessagesToSend();
 
-    for (let index = 0; index < messages.length; index += 1) {
-      const message = messages[index];
+            console.log(`${messages.length} new message to send`);
 
-      const { status } = await whatsapp.sendMessage(message);
+            for (let index = 0; index < messages.length; index += 1) {
+                const message = messages[index];
 
-      console.log(`send message status: ${status}`);
+                const { status } = await whatsapp.sendMessage(message);
 
-      await messagesRepository.save({ ...message, status });
+                console.log(`send message status: ${status}`);
 
-      await sleepRandomTime({
-        minMilliseconds: process.env.MIN_SLEEP_INTERVAL,
-        maxMilliseconds: process.env.MAX_SLEEP_INTERVAL,
-      });
-    }
-  } catch (error) {
-    console.error(`fail to check new messages. description: ${error}`);
-  }
-  checking = false;
-};
+                await messagesRepository.save({ ...message, status });
 
-setInterval(checkMessages, process.env.CHECK_INTERVAL);
+                await sleepRandomTime({
+                    minMilliseconds: process.env.MIN_SLEEP_INTERVAL,
+                    maxMilliseconds: process.env.MAX_SLEEP_INTERVAL,
+                });
+            }
+        } catch (error) {
+            console.error(`fail to check new messages. description: ${error}`);
+            console.error(error)
+        }
+        checking = false;
+    };
+
+    setInterval(checkMessages, process.env.CHECK_INTERVAL);
+})

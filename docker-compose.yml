@@ -1,13 +1,19 @@
-version: '3'
 services:
-  mysql_dev:
-    image: mysql:5.7
-    environment:
-      - MYSQL_ROOT_PASSWORD=1234
-      - MYSQL_DATABASE=whatsapp
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=1234
-    expose:
-      - '3306'
-    ports:
-      - '3306:3306'
+    mysql_dev:
+        image: mariadb:11
+        environment:
+            - MARIADB_ROOT_PASSWORD=1234
+            - MARIADB_DATABASE=whatsapp
+            - MARIADB_USER=admin
+            - MARIADB_PASSWORD=1234
+        expose:
+            - '3306'
+        ports:
+            - '3306:3306'
+        restart: always
+        container_name: whatsapp_db
+        volumes:
+            - whatsapp:/var/lib/mysql
+
+volumes:
+    whatsapp:
